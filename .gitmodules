@@ -1,0 +1,3 @@
+[submodule "docker-image/peertube/app"]
+	path = peertube/src
+	url = https://github.com/chocobozzz/PeerTube
