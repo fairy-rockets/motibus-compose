@@ -18,12 +18,13 @@ RUN groupadd -r peertube \
     && useradd -r -g peertube -m peertube
 
 # Install PeerTube
-COPY ./src /app
-RUN chown -R peertube:peertube /app
 
+# Copy sources
+COPY --chown=peertube:peertube ./src /app
+
+# Build
 WORKDIR /app
 USER peertube
-
 RUN yarn install --pure-lockfile \
     && npm run build -- $NPM_RUN_BUILD_OPTS \
     && rm -r ./node_modules ./client/node_modules \
