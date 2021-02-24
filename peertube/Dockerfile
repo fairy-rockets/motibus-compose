@@ -18,9 +18,10 @@ RUN groupadd -r peertube \
     && useradd -r -g peertube -m peertube
 
 # Install PeerTube
-COPY --chown=peertube:peertube ./src /app
-WORKDIR /app
+COPY ./src /app
+RUN chown -R peertube:peertube /app
 
+WORKDIR /app
 USER peertube
 
 RUN yarn install --pure-lockfile \
