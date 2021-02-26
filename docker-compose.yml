@@ -2,26 +2,53 @@
 version: '3.7'
 
 services:
-
-  peertube:
-    container_name: peertube
-    hostname: peertube
-    image: peertube
+  # You can comment this webserver section if you want to use another webserver/proxy
+  web:
+    container_name: motibus_web
+    hostname: motibus_web
+    #image: chocobozzz/peertube-webserver:latest
+    # If you don't want to use the official image and build one from sources:
     build:
-      context: ./peertube
-    networks:
-      - default
-      - planet-link
+      context: ./images/nginx
+      dockerfile: Dockerfile
     env_file:
       - .env
-
     expose:
-      - '1935'
-      - '9000'
+     - '80'
+    networks:
+     - default
+     - planet-link
     volumes:
-      - ./docker-volume/assets:/app/client/dist
-      - ./docker-volume/data:/data
-      - ./docker-volume/config:/config
+      - type: bind
+        # Switch sources if you downloaded the whole repository
+        #source: ../../nginx/peertube
+        source: ./images/nginx/peertube.conf
+        target: /etc/nginx/conf.d/peertube.template
+      - assets:/var/www/peertube/peertube-latest/client/dist:ro
+      - ./volume/peertube/data:/var/www/peertube/storage
+    depends_on:
+      - peertube
+    restart: "always"
+
+  peertube:
+    container_name: motibus_peertube
+    hostname: motibus_peertube
+    image: motibus_peertube
+    build:
+      context: ./images/peertube
+    networks:
+      default:
+        ipv4_address: 172.54.0.42
+    env_file:
+      - .env
+    expose:
+      - '9000'
+    ports:
+      - '1935:1935'
+    volumes:
+      - assets:/app/client/dist
+      - ./volume/peertube/data:/data
+      - ./volume/peertube/config:/config
     depends_on:
       - postgres
       - redis
@@ -33,13 +60,13 @@ services:
     env_file:
       - .env
     volumes:
-      - ./docker-volume/db:/var/lib/postgresql/data
+      - ./volume/db:/var/lib/postgresql/data
     restart: "always"
 
   redis:
     image: redis:6-alpine
     volumes:
-      - ./docker-volume/redis:/data
+      - ./volume/redis:/data
     restart: "always"
 
   postfix:
@@ -47,11 +74,19 @@ services:
     env_file:
       - .env
     volumes:
-      - ./docker-volume/opendkim/keys:/etc/opendkim/keys
+      - ./volume/opendkim/keys:/etc/opendkim/keys
     restart: "always"
 
 networks:
+networks:
   default:
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.54.0.0/16
   planet-link:
     external:
       name: planet-link
+
+volumes:
+  assets:
