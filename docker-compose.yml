@@ -1,5 +1,5 @@
 ---
-version: '3.7'
+version: '3.9'
 
 services:
   # You can comment this webserver section if you want to use another webserver/proxy
@@ -16,7 +16,7 @@ services:
     expose:
      - '80'
     networks:
-     - default
+     - motibus-link
      - planet-link
     volumes:
       - type: bind
@@ -37,7 +37,7 @@ services:
     build:
       context: ./images/peertube
     networks:
-      default:
+      motibus-link:
         ipv4_address: 172.54.0.42
     env_file:
       - .env
@@ -62,12 +62,16 @@ services:
     volumes:
       - ./volume/db:/var/lib/postgresql/data
     restart: "always"
+    networks:
+     - motibus-link
 
   redis:
     image: redis:6-alpine
     volumes:
       - ./volume/redis:/data
     restart: "always"
+    networks:
+     - motibus-link
 
   postfix:
     image: mwader/postfix-relay
@@ -76,14 +80,16 @@ services:
     volumes:
       - ./volume/opendkim/keys:/etc/opendkim/keys
     restart: "always"
+    networks:
+     - motibus-link
 
 networks:
-networks:
-  default:
+  motibus-link:
+    external: false
     ipam:
       driver: default
       config:
-      - subnet: 172.54.0.0/16
+      - subnet:  172.54.0.0/16
   planet-link:
     external:
       name: planet-link

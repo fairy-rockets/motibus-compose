@@ -3,6 +3,7 @@ FROM nginx:alpine
 COPY ./entrypoint.nginx.sh .
 RUN chmod +x entrypoint.nginx.sh
 
-EXPOSE 80 443
+EXPOSE 80
+
 ENTRYPOINT []
 CMD ["/bin/sh", "entrypoint.nginx.sh"]
