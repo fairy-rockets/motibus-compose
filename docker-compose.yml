@@ -25,7 +25,7 @@ services:
         source: ./images/nginx/peertube.conf
         target: /etc/nginx/conf.d/peertube.template
       - assets:/var/www/peertube/peertube-latest/client/dist:ro
-      - ./volume/peertube/data:/var/www/peertube/storage
+      - ./var/peertube/data:/var/www/peertube/storage
     depends_on:
       - peertube
     restart: "always"
@@ -47,8 +47,8 @@ services:
       - '1935:1935'
     volumes:
       - assets:/app/client/dist
-      - ./volume/peertube/data:/data
-      - ./volume/peertube/config:/config
+      - ./var/peertube/data:/data
+      - ./var/peertube/config:/config
     depends_on:
       - postgres
       - redis
@@ -60,7 +60,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./volume/db:/var/lib/postgresql/data
+      - ./var/db:/var/lib/postgresql/data
     restart: "always"
     networks:
      - motibus-link
@@ -68,7 +68,7 @@ services:
   redis:
     image: redis:6-alpine
     volumes:
-      - ./volume/redis:/data
+      - ./var/redis:/data
     restart: "always"
     networks:
      - motibus-link
@@ -78,7 +78,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./volume/opendkim/keys:/etc/opendkim/keys
+      - ./var/opendkim/keys:/etc/opendkim/keys
     restart: "always"
     networks:
      - motibus-link
